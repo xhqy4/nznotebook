@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>地图记录本</title>
+    <title>逆战：未来地图助手1.0</title>
     <style>
         * {
             margin: 0;
@@ -412,6 +412,79 @@
             color: var(--text-muted);
             font-weight: 500;
             margin-left: auto;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 2px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-btn .badge {
+            font-size: 11px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .filter-btn.active .badge {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.filter-all.active {
+            background: var(--success-gradient);
+        }
+
+        .filter-btn.filter-普通.active {
+            background: var(--success-gradient);
+        }
+
+        .filter-btn.filter-困难.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .filter-btn.filter-英雄.active {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #333;
+        }
+
+        .filter-btn.filter-炼狱.active {
+            background: var(--danger-gradient);
+        }
+
+        .filter-btn.filter-折磨.active {
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
         }
 
         .add-record-card {
@@ -1095,7 +1168,8 @@
                 mapImage: null,
                 mapName: '',
                 records: [],
-                tempDifficulty: ''
+                tempDifficulty: '',
+                filter: 'all'
             };
             rows.push(row);
             renderRows();
@@ -1190,6 +1264,26 @@
                                 <span>记录列表</span>
                                 <span class="count">${row.records.length} 条</span>
                             </div>
+                            <div class="filter-section">
+                                <button class="filter-btn filter-all ${!row.filter || row.filter === 'all' ? 'active' : ''}" onclick="setFilter('${row.id}', 'all')">
+                                    全部 <span class="badge">${row.records.length}</span>
+                                </button>
+                                <button class="filter-btn filter-普通 ${row.filter === '普通' ? 'active' : ''}" onclick="setFilter('${row.id}', '普通')">
+                                    普通 <span class="badge">${row.records.filter(r => r.difficulty === '普通').length}</span>
+                                </button>
+                                <button class="filter-btn filter-困难 ${row.filter === '困难' ? 'active' : ''}" onclick="setFilter('${row.id}', '困难')">
+                                    困难 <span class="badge">${row.records.filter(r => r.difficulty === '困难').length}</span>
+                                </button>
+                                <button class="filter-btn filter-英雄 ${row.filter === '英雄' ? 'active' : ''}" onclick="setFilter('${row.id}', '英雄')">
+                                    英雄 <span class="badge">${row.records.filter(r => r.difficulty === '英雄').length}</span>
+                                </button>
+                                <button class="filter-btn filter-炼狱 ${row.filter === '炼狱' ? 'active' : ''}" onclick="setFilter('${row.id}', '炼狱')">
+                                    炼狱 <span class="badge">${row.records.filter(r => r.difficulty === '炼狱').length}</span>
+                                </button>
+                                <button class="filter-btn filter-折磨 ${row.filter === '折磨' ? 'active' : ''}" onclick="setFilter('${row.id}', '折磨')">
+                                    折磨 <span class="badge">${row.records.filter(r => r.difficulty === '折磨').length}</span>
+                                </button>
+                            </div>
                             <div class="records-list" id="records-${row.id}">
                                 ${renderRecords(row)}
                             </div>
@@ -1201,18 +1295,24 @@
         }
 
         function renderRecords(row) {
-            if (row.records.length === 0) {
+            let recordsToRender = row.records;
+            
+            if (row.filter && row.filter !== 'all') {
+                recordsToRender = row.records.filter(r => r.difficulty === row.filter);
+            }
+            
+            if (recordsToRender.length === 0) {
                 return `
                     <div class="empty-records">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
                         </svg>
-                        <div>暂无记录</div>
+                        <div>${row.filter && row.filter !== 'all' ? '该难度暂无记录' : '暂无记录'}</div>
                     </div>
                 `;
             }
 
-            return row.records.map(record => `
+            return recordsToRender.map(record => `
                 <div class="record-card difficulty-${record.difficulty}">
                     <div class="record-header">
                         <span class="record-difficulty ${record.difficulty}">
@@ -1309,6 +1409,15 @@
             const row = rows.find(r => r.id === rowId);
             if (row) {
                 row.tempDifficulty = value;
+            }
+        }
+
+        function setFilter(rowId, filter) {
+            const row = rows.find(r => r.id === rowId);
+            if (row) {
+                row.filter = filter;
+                renderRows();
+                saveToStorage();
             }
         }
 
@@ -1424,6 +1533,9 @@
                     rows.forEach(row => {
                         if (row.tempDifficulty === undefined) {
                             row.tempDifficulty = '';
+                        }
+                        if (row.filter === undefined) {
+                            row.filter = 'all';
                         }
                     });
                     console.log('数据已加载，大小:', (data.length / 1024).toFixed(2), 'KB');
