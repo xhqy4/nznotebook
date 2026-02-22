@@ -975,8 +975,7 @@
                 rowEl.innerHTML = `
                     <div class="row-header">
                         <div class="row-header-title">
-                            <h3>📍 地图 ${index + 1}</h3>
-                            ${row.mapName ? `<span class="map-name">${row.mapName}</span>` : ''}
+                            <h3>📍 ${row.mapName || '地图 ' + (index + 1)}</h3>
                         </div>
                         <div class="row-header-actions">
                             <button class="btn-collapse" onclick="toggleRow('${row.id}')" title="折叠/展开">
