@@ -923,7 +923,7 @@
                 tempDifficulty: '',
                 tempDropDescription: '',
                 filter: 'all',
-                collapsed: false
+                collapsed: true
             };
             rows.push(row);
             renderRows();
@@ -1010,7 +1010,7 @@
                                     <input type="text" 
                                            class="map-name-input" 
                                            id="dropDescription-${row.id}"
-                                           placeholder="输入出货描述（可选）" 
+                                           placeholder="输入出货描述（可选填）" 
                                            value="${row.tempDropDescription}"
                                            oninput="updateTempDropDescription('${row.id}', this.value)">
                                 </div>
@@ -1193,10 +1193,9 @@
                         if (row.filter === undefined) {
                             row.filter = 'all';
                         }
-                        if (row.collapsed === undefined) {
-                            row.collapsed = false;
-                        }
+                        row.collapsed = true;
                     });
+                    saveToStorage();
                     console.log('数据已加载，大小:', (data.length / 1024).toFixed(2), 'KB');
                     renderRows();
                 }
